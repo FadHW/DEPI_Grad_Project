@@ -50,8 +50,14 @@ Peak accident periods,
 Major contributing factors, and
 Severity patterns    
 ## 🛠️ Tools & Technologies  
-[![Power BI](https://img.shields.io/badge/Power%20BI-Visualization-0078D4?logo=microsoft-power-bi&logoColor=white&style=for-the-badge)](https://powerbi.microsoft.com/)    
-[![Excel](https://img.shields.io/badge/Excel-Data%20Processing-217346?logo=microsoft-excel&logoColor=white&style=for-the-badge)](https://www.microsoft.com/en-us/microsoft-365/excel)    
-[![Python](https://img.shields.io/badge/Python-Data%20Analysis-3776AB?logo=python&logoColor=white&style=for-the-badge)](https://www.python.org/)    
-[![EDA](https://img.shields.io/badge/EDA-Exploratory%20Analysis-F4A261?style=for-the-badge)](#)  
+[![Excel](https://img.shields.io/badge/Excel-217346?style=flat&logo=microsoft-excel&logoColor=white)]()
+[![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=flat&logo=power-bi&logoColor=black)]()
+[![Python](https://img.shields.io/badge/Python-000000?style=for-the-badge&logo=python&logoColor=)]()
+[![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?style=flat&logo=matplotlib&logoColor=white)]()
+[![Seaborn](https://img.shields.io/badge/Seaborn-4C72B0?style=flat&logoColor=white)]()  
 
+
+### Project Management tools:
+[![Trello](https://img.shields.io/badge/Trello-0079BF?style=flat&logo=trello&logoColor=white)](https://trello.com/)
+[![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logo=jira&logoColor=white)](https://www.atlassian.com/software/jira)  
