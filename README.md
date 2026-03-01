@@ -6,8 +6,8 @@ This repository contains our DEPI (Digital Egypt Pioneers Initiative) Graduation
 ## 📌 Project Overview  
 
 This project analyzes the dataset:  
-  "حوادث السيارات والقطارات 2024"
-Translation: Car and Train Accidents – 2024  
+  "حوادث السيارات والقطارات منذ 2020"
+Translation: Car and Train Accidents – 2020-2024  
 
 The dataset contains official Egyptian accident records for the year 2024, covering:  
   - 🚗 Road (Car) Accidents  
@@ -56,8 +56,9 @@ Severity patterns
 [![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
 [![Matplotlib](https://img.shields.io/badge/Matplotlib-11557C?style=flat&logo=matplotlib&logoColor=white)]()
 [![Seaborn](https://img.shields.io/badge/Seaborn-4C72B0?style=flat&logoColor=white)]()  
-
+ 
 
 ### Project Management tools:
-[![Trello](https://img.shields.io/badge/Trello-0079BF?style=flat&logo=trello&logoColor=white)](https://trello.com/)
-[![Jira](https://img.shields.io/badge/Jira-0052CC?style=flat&logo=jira&logoColor=white)](https://www.atlassian.com/software/jira)  
+_For the project work flow, visit:_  
+
+[![Visit Project](https://img.shields.io/badge/Visit-TrelloBoard-blue)]([https://yourprojectlink.com](https://trello.com/invite/b/69a43d061e9e76a792da4db0/ATTI269cdc41fc9d2ae9c55af57a916cc0270BF7D1F6/egyptian-road-railway-accidents-analysis))
