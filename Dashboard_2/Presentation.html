@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road Accident Analysis Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2128;
+  --bg-card-hover: #21262d;
+  --border: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-blue: #58a6ff;
+  --accent-cyan: #39d0d8;
+  --accent-red: #f85149;
+  --accent-orange: #f0883e;
+  --accent-green: #3fb950;
+  --accent-purple: #a371f7;
+  --accent-yellow: #d29922;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* ===== NAVIGATION ===== */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  letter-spacing: 0.5px;
+}
+
+.nav-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-dot.active {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px rgba(57, 208, 216, 0.4);
+}
+
+.nav-dot:hover {
+  background: var(--text-muted);
+}
+
+.nav-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ===== SLIDES ===== */
+.slide {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 48px 48px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.slide.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slide-inner {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* ===== TITLE SLIDE ===== */
+.title-slide {
+  text-align: center;
+  position: relative;
+}
+
+.title-slide::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(57,208,216,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.title-icon {
+  width: 80px; height: 80px;
+  margin: 0 auto 32px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 8px 32px rgba(57, 208, 216, 0.2);
+}
+
+.title-slide h1 {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.title-slide .subtitle {
+  font-size: 20px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 48px;
+}
+
+.title-meta {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  margin-top: 40px;
+}
+
+.meta-block {
+  text-align: center;
+}
+
+.meta-block .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.meta-block .value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.8;
+}
+
+.meta-block .value.name {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* ===== SECTION HEADER ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.section-number {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--bg-primary);
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-title span {
+  color: var(--accent-cyan);
+}
+
+/* ===== CARDS ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.card-icon.blue { background: rgba(88,166,255,0.12); }
+.card-icon.red { background: rgba(248,81,73,0.12); }
+.card-icon.green { background: rgba(63,185,80,0.12); }
+.card-icon.orange { background: rgba(240,136,62,0.12); }
+.card-icon.purple { background: rgba(163,113,247,0.12); }
+.card-icon.cyan { background: rgba(57,208,216,0.12); }
+.card-icon.yellow { background: rgba(210,153,34,0.12); }
+
+.card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ===== PLACEHOLDER ===== */
+.placeholder {
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  color: var(--text-muted);
+  min-height: 200px;
+  transition: all 0.3s ease;
+}
+
+.placeholder:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(57,208,216,0.03);
+}
+
+.placeholder .ph-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.placeholder .ph-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.placeholder .ph-hint {
+  font-size: 12px;
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
+/* ===== KPI CARDS ===== */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.kpi-card .kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.kpi-card .kpi-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.kpi-card .kpi-delta {
+  font-size: 12px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* ===== FLOW DIAGRAM ===== */
+.flow-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+
+.flow-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  text-align: center;
+  min-width: 150px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.flow-step:hover {
+  border-color: var(--accent-cyan);
+  background: var(--bg-card-hover);
+}
+
+.flow-step .step-num {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bg-primary);
+  margin: 0 auto 12px;
+}
+
+.flow-step .step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.flow-arrow {
+  color: var(--text-muted);
+  font-size: 20px;
+  padding: 0 8px;
+  font-weight: 300;
+}
+
+/* ===== INSIGHT ITEMS ===== */
+.insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  transition: all 0.3s ease;
+}
+
+.insight-item:hover {
+  border-color: var(--accent-cyan);
+}
+
+.insight-bullet {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.insight-item p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.insight-item strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ===== RECOMMENDATIONS ===== */
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.rec-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.rec-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.rec-card .rec-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rec-card .rec-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.rec-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.rec-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.rec-card li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.rec-card li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 13px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+
+/* ===== TOOLS GRID ===== */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.tool-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-4px);
+}
+
+.tool-card .tool-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+.tool-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.tool-card ul {
+  list-style: none;
+  text-align: left;
+  padding: 0;
+}
+
+.tool-card li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.tool-card li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+
+/* ===== CONCLUSION ===== */
+.conclusion-slide {
+  text-align: center;
+}
+
+.conclusion-slide h2 {
+  font-size: 36px;
+  font-weight: 700;
+  max-width: 800px;
+  margin: 0 auto 48px;
+  line-height: 1.4;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.conclusion-slide .conclusion-placeholder {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .slide { padding: 80px 24px 32px; }
+  .title-slide h1 { font-size: 32px; }
+  .section-title { font-size: 24px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .rec-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .title-meta { flex-direction: column; gap: 24px; }
+  .flow-container { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+
+@media (max-width: 600px) {
+  .kpi-row { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* ===== DASHBOARD PREVIEW ===== */
+.dashboard-preview {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.dashboard-preview img {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+}
+
+/* ===== TWO COLUMN ===== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.two-col .text-col p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.two-col .text-col ul {
+  list-style: none;
+  padding: 0;
+}
+
+.two-col .text-col li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.two-col .text-col li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 12px;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  background: var(--accent-cyan);
+}
+
+/* ===== AGE GROUP SPECIAL ===== */
+.age-note {
+  background: linear-gradient(135deg, rgba(248,81,73,0.08), rgba(240,136,62,0.08));
+  border: 1px solid rgba(248,81,73,0.2);
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.age-note h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-red);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.age-note p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ===== FOOTER ===== */
+.slide-footer {
+  position: absolute;
+  bottom: 20px;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Print styles */
+@media print {
+  .nav { display: none; }
+  .slide {
+    page-break-after: always;
+    opacity: 1 !important;
+    transform: none !important;
+    min-height: 100vh;
+    padding: 40px;
+  }
+  body { background: white; color: black; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="nav">
+  <div class="nav-brand">🚦 Road Accident Analysis Dashboard</div>
+  <div class="nav-dots" id="navDots"></div>
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()">◀ Prev</button>
+    <button class="nav-btn" onclick="nextSlide()">Next ▶</button>
+  </div>
+</nav>
+
+<!-- ===== SLIDE 1: TITLE ===== -->
+<section class="slide" id="slide1">
+  <div class="slide-inner title-slide">
+    <div class="title-icon">🚗</div>
+    <h1>Road Accident Analysis Dashboard</h1>
+    <p class="subtitle">Data-driven insights for improving road safety in Egypt</p>
+    
+    <div class="title-meta">
+      <div class="meta-block">
+        <div class="label">Instructor</div>
+        <div class="value name">Eng. Mohamed Alnajjar</div>
+      </div>
+      <div class="meta-block">
+        <div class="label">Team Members</div>
+        <div class="value">
+          Fadi Wadie<br>
+          Ahmed Ali Hussein<br>
+          Karem Hashem Aldafrawy<br>
+          Mayada Ahmed Mohamed<br>
+          Mariam Mostafa Ahmed
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>1 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 2: INTRODUCTION ===== -->
+<section class="slide" id="slide2">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <h2 class="section-title">Introduction: <span>Why Road Accident Analysis?</span></h2>
+    </div>
+    
+    <div class="two-col">
+      <div class="text-col">
+        <p>Road accidents are a major public health and socioeconomic problem affecting millions of lives worldwide. In Egypt, traffic incidents remain one of the leading causes of premature death and disability.</p>
+        <p>The consequences extend far beyond the immediate victims:</p>
+        <ul>
+          <li><strong>Loss of lives</strong> — Thousands of fatalities annually</li>
+          <li><strong>Severe injuries</strong> — Long-term physical and psychological trauma</li>
+          <li><strong>Economic losses</strong> — Billions in healthcare, property damage, and productivity</li>
+          <li><strong>Material damage</strong> — Infrastructure and vehicle destruction</li>
+        </ul>
+      </div>
+      <div class="text-col">
+        <div class="placeholder" style="min-height: 280px;">
+          <div class="ph-icon">🛣️</div>
+          <div class="ph-label">Road Safety Image Placeholder</div>
+          <div class="ph-hint">Insert a professional road safety / traffic image here</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top: 24px;">
+      <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.7;">
+        This project analyzes comprehensive accident data to <strong style="color: var(--accent-cyan);">discover hidden patterns</strong>, identify high-risk zones and demographics, and generate <strong style="color: var(--accent-cyan);">actionable insights</strong> that can directly support evidence-based road safety policies and interventions.
+      </p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>2 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 3: OBJECTIVES ===== -->
+<section class="slide" id="slide3">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <h2 class="section-title">Project <span>Objectives</span></h2>
+    </div>
+    
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon blue">📊</div>
+        <h3>Analyze Accident Patterns</h3>
+        <p>Uncover temporal, spatial, and categorical trends in road accident data to understand when, where, and how accidents occur most frequently.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon red">🗺️</div>
+        <h3>Identify High-Risk Areas</h3>
+        <p>Pinpoint governorates and road segments with the highest accident density to prioritize safety interventions and resource allocation.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon orange">⚠️</div>
+        <h3>Understand Severity Factors</h3>
+        <p>Investigate the key variables influencing accident severity — vehicle type, road conditions, user category, and demographic factors.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon green">📈</div>
+        <h3>Interactive Dashboards</h3>
+        <p>Build dynamic, filterable Power BI dashboards that enable stakeholders to explore data and make informed, data-driven decisions.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon purple">💡</div>
+        <h3>Evidence-Based Recommendations</h3>
+        <p>Translate analytical findings into concrete, actionable policy recommendations for government and traffic authorities.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>3 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 4: DATA SOURCE ===== -->
+<section class="slide" id="slide4">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <h2 class="section-title">Data Source & <span>Dataset Overview</span></h2>
+    </div>
+    
+    <div class="two-col">
+      <div class="text-col">
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-icon cyan">🏛️</div>
+          <h3>Central Agency for Public Mobilization and Statistics (CAPMAS)</h3>
+          <p style="margin-top: 8px;">Official government source for comprehensive road and rail accident statistics in Egypt.</p>
+        </div>
+        
+        <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 16px;">
+          The dataset spans multiple years and covers a wide range of variables essential for a holistic safety analysis:
+        </p>
+        
+        <ul>
+          <li>Number of accidents per governorate</li>
+          <li>Fatalities and injuries (by gender)</li>
+          <li>Governorate-level distribution</li>
+          <li>Vehicle type involvement</li>
+          <li>Road user categories</li>
+          <li>Age group breakdowns</li>
+          <li>Emergency & ambulance coverage data</li>
+        </ul>
+      </div>
+      <div class="text-col">
+        <div class="placeholder" style="min-height: 360px;">
+          <div class="ph-icon">📁</div>
+          <div class="ph-label">Dataset Visual / Schema Placeholder</div>
+          <div class="ph-hint">Insert dataset structure diagram or data source image here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>4 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 5: WORKFLOW ===== -->
+<section class="slide" id="slide5">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <h2 class="section-title">Project <span>Workflow</span></h2>
+    </div>
+    
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-title">Data Collection</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-title">Data Cleaning & Prep</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-title">Transformation & Modeling</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-title">Analysis & KPIs</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">5</div>
+        <div class="step-title">Dashboard Design</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">6</div>
+        <div class="step-title">Insights & Recommendations</div>
+      </div>
+    </div>
+    
+    <div class="card-grid" style="margin-top: 40px;">
+      <div class="card">
+        <div class="card-icon blue">🔍</div>
+        <h3>Data Collection</h3>
+        <p>Gathered raw accident data from CAPMAS covering multiple years and governorates.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon cyan">🧹</div>
+        <h3>Data Cleaning</h3>
+        <p>Handled missing values, standardized formats, and removed inconsistencies using Power Query.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon purple">⚙️</div>
+        <h3>Transformation</h3>
+        <p>Created calculated columns, merged tables, and built a star schema data model.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon green">📐</div>
+        <h3>DAX Measures</h3>
+        <p>Developed custom KPIs including cruelty rate, deaths per capita, and coverage metrics.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon orange">🎨</div>
+        <h3>Visualization</h3>
+        <p>Designed interactive dashboards with maps, charts, and slicers for deep exploration.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon red">🎯</div>
+        <h3>Insights</h3>
+        <p>Extracted key findings and formulated data-driven safety recommendations.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>5 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 6: DASHBOARD OVERVIEW ===== -->
+<section class="slide" id="slide6">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <h2 class="section-title">Dashboard <span>Overview</span></h2>
+    </div>
+    
+    <div class="card" style="margin-bottom: 28px;">
+      <p style="font-size: 16px; color: var(--text-secondary); line-height: 1.7;">
+        The dashboard provides a <strong style="color: var(--accent-cyan);">comprehensive analysis</strong> of road accidents through multiple interconnected visualizations. Each chart highlights a specific dimension of the problem, enabling stakeholders to drill down from high-level KPIs to granular details.
+      </p>
+    </div>
+    
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon blue">📋</div>
+        <h3>Accident Overview</h3>
+        <p>High-level KPIs: total accidents, deaths, injuries, and cruelty rate across all years.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon red">💀</div>
+        <h3>Death & Injury Analysis</h3>
+        <p>Gender-based breakdown and monthly trend tracking of fatalities and injuries.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon green">🗺️</div>
+        <h3>Governorate Comparison</h3>
+        <p>Geographic heatmaps and rankings to identify high-risk governorates.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon orange">🚗</div>
+        <h3>Vehicle Analysis</h3>
+        <p>Distribution of accidents by vehicle type: cars, trucks, motorcycles, trains, and others.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon purple">👥</div>
+        <h3>Road User Analysis</h3>
+        <p>Breakdown by drivers, passengers, pedestrians, and other road users.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon cyan">👶</div>
+        <h3>Age Group Analysis</h3>
+        <p>Demographic profiling to identify vulnerable age segments.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>6 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 7: DASHBOARD 1 - EGYPT ROAD & RAIL SAFETY ===== -->
+<section class="slide" id="slide7">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <h2 class="section-title">Dashboard 1: <span>Egypt Road & Rail Safety</span></h2>
+    </div>
+    
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-orange);">311,669</div>
+        <div class="kpi-label">Total Injuries</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-red);">32,387</div>
+        <div class="kpi-label">Total Deaths</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-cyan);">13.86%</div>
+        <div class="kpi-label">Cruelty Rate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-green);">↓ Trend</div>
+        <div class="kpi-label">Deaths / 1K Pop (2020–2024)</div>
+      </div>
+    </div>
+    
+    <div class="placeholder" style="min-height: 420px;">
+      <div class="ph-icon">📊</div>
+      <div class="ph-label">Egypt Road & Rail Safety Dashboard Screenshot</div>
+      <div class="ph-hint">Insert the full dashboard screenshot here</div>
+    </div>
+    
+    <div class="card-grid" style="margin-top: 20px;">
+      <div class="card">
+        <h3>🚗 Vehicle Distribution</h3>
+        <p>Cars (43%) and Other vehicles (44%) dominate accident involvement. Trains account for only 3% but represent a distinct risk category.</p>
+      </div>
+      <div class="card">
+        <h3>📈 Temporal Trend</h3>
+        <p>Car vs. Train deaths peaked in 2022 and show a declining trend through 2024, indicating potential policy effectiveness.</p>
+      </div>
+      <div class="card">
+        <h3>👶 Age Vulnerability</h3>
+        <p>The 15–25 age group shows the highest injury and death counts, highlighting the need for targeted youth safety programs.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>7 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 8: DASHBOARD 2 - 2024 ROAD TRAFFIC ANALYSIS ===== -->
+<section class="slide" id="slide8">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <h2 class="section-title">Dashboard 2: <span>2024 Road Traffic Analysis</span></h2>
+    </div>
+    
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-red);">4,352</div>
+        <div class="kpi-label">Male Deaths</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-orange);">856</div>
+        <div class="kpi-label">Female Deaths</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-cyan);">6.89%</div>
+        <div class="kpi-label">Cruelty Rate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-purple);">4.94</div>
+        <div class="kpi-label">Deaths / 100K Population</div>
+      </div>
+    </div>
+    
+    <div class="placeholder" style="min-height: 420px;">
+      <div class="ph-icon">📊</div>
+      <div class="ph-label">2024 Road Traffic Analysis Dashboard Screenshot</div>
+      <div class="ph-hint">Insert the full dashboard screenshot here</div>
+    </div>
+    
+    <div class="card-grid" style="margin-top: 20px;">
+      <div class="card">
+        <h3>📅 Monthly Patterns</h3>
+        <p>Accidents peak in April and October, suggesting seasonal or holiday-related risk factors that warrant preventive campaigns.</p>
+      </div>
+      <div class="card">
+        <h3>🚙 Vehicle Types</h3>
+        <p>"Other" vehicles (55,166) and Cars (19,742) are the primary contributors, followed by bicycles and motorcycles.</p>
+      </div>
+      <div class="card">
+        <h3>👥 Road Users</h3>
+        <p>Passengers and pedestrians are the most affected groups, emphasizing the need for pedestrian safety infrastructure.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>8 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 9: DASHBOARD 3 - 2024 EMERGENCY & AMBULANCE ===== -->
+<section class="slide" id="slide9">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <h2 class="section-title">Dashboard 3: <span>2024 Emergency & Ambulance</span></h2>
+    </div>
+    
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-cyan);">1,767</div>
+        <div class="kpi-label">Ambulance Centers</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-blue);">3,263</div>
+        <div class="kpi-label">Ambulance Cars</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-red);">1.55</div>
+        <div class="kpi-label">Center per 100K (Goal: 2)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" style="color: var(--accent-orange);">0.75</div>
+        <div class="kpi-label">Cars per 25K (Goal: 1)</div>
+      </div>
+    </div>
+    
+    <div class="placeholder" style="min-height: 420px;">
+      <div class="ph-icon">📊</div>
+      <div class="ph-label">2024 Emergency & Ambulance Dashboard Screenshot</div>
+      <div class="ph-hint">Insert the full dashboard screenshot here</div>
+    </div>
+    
+    <div class="card-grid" style="margin-top: 20px;">
+      <div class="card">
+        <h3>🗺️ Coverage Gap</h3>
+        <p>59.26% of governorates fall below target coverage. Menia has the lowest coverage (0.45 cars per 25K), creating critical response delays.</p>
+      </div>
+      <div class="card">
+        <h3>🏆 Top Performers</h3>
+        <p>South Sinai leads with the highest center density per 100K population, serving as a model for other governorates.</p>
+      </div>
+      <div class="card">
+        <h3>⚠️ Geographic Inequality</h3>
+        <p>Red Sea and Sinai regions show better coverage, while Nile Delta and Upper Egypt governorates remain underserved.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>9 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 10: GEOGRAPHICAL ANALYSIS ===== -->
+<section class="slide" id="slide10">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <h2 class="section-title">Geographical <span>Analysis</span></h2>
+    </div>
+    
+    <div class="two-col">
+      <div class="text-col">
+        <div class="placeholder" style="min-height: 320px;">
+          <div class="ph-icon">🗺️</div>
+          <div class="ph-label">Map Visualization Placeholder</div>
+          <div class="ph-hint">Insert governorate-level map / heatmap screenshot here</div>
+        </div>
+      </div>
+      <div class="text-col">
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>🎯 High-Risk Governorates</h3>
+          <p style="margin-top: 8px;">Cairo, Giza, and Alexandria show the highest absolute numbers due to population density and traffic volume.</p>
+        </div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>📍 Coverage Disparities</h3>
+          <p style="margin-top: 8px;">Rural and frontier governorates suffer from both higher accident rates and lower emergency response capacity.</p>
+        </div>
+        <div class="card">
+          <h3>🏗️ Planning Implications</h3>
+          <p style="margin-top: 8px;">Geographic analysis enables targeted infrastructure investment, ambulance station placement, and patrol routing optimization.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>10 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 11: VEHICLE & ROAD USER ===== -->
+<section class="slide" id="slide11">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2 class="section-title">Vehicle & Road User <span>Analysis</span></h2>
+    </div>
+    
+    <div class="two-col">
+      <div class="text-col">
+        <h3 style="font-size: 18px; margin-bottom: 16px; color: var(--accent-cyan);">🚗 Vehicle Types</h3>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Cars</strong> — 43% of vehicle-related accidents. Primary cause of fatalities on highways.</p>
+        </div>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Trucks & Buses</strong> — Lower frequency but higher severity per incident due to mass and speed.</p>
+        </div>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Motorcycles</strong> — Disproportionately high injury rate; riders lack protective barriers.</p>
+        </div>
+        <div class="card">
+          <p><strong>Others / Unknown</strong> — Largest category (44%), indicating data collection gaps in vehicle classification.</p>
+        </div>
+      </div>
+      <div class="text-col">
+        <h3 style="font-size: 18px; margin-bottom: 16px; color: var(--accent-orange);">👥 Road Users</h3>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Passengers</strong> — Most affected group. Vulnerable to driver behavior and vehicle safety standards.</p>
+        </div>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Pedestrians</strong> — High fatality rate due to insufficient crossings, sidewalks, and lighting.</p>
+        </div>
+        <div class="card" style="margin-bottom: 12px;">
+          <p><strong>Drivers</strong> — Directly responsible for control; influenced by experience, fatigue, and distraction.</p>
+        </div>
+        <div class="card">
+          <p><strong>Others / Unknown</strong> — Significant portion suggests need for better incident reporting protocols.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>11 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 12: AGE GROUP ===== -->
+<section class="slide" id="slide12">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <h2 class="section-title">Age Group <span>Analysis</span></h2>
+    </div>
+    
+    <div class="two-col">
+      <div class="text-col">
+        <div class="placeholder" style="min-height: 300px;">
+          <div class="ph-icon">📊</div>
+          <div class="ph-label">Age Group Chart Placeholder</div>
+          <div class="ph-hint">Insert age group distribution chart here</div>
+        </div>
+      </div>
+      <div class="text-col">
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>👶 Children (0–15)</h3>
+          <p style="margin-top: 8px;">Lower absolute numbers but high vulnerability. Dependent on adult supervision and safe school zones.</p>
+        </div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>🧑 Youth (15–25)</h3>
+          <p style="margin-top: 8px;"><strong style="color: var(--accent-red);">Highest risk group.</strong> Peak injury and death rates. Linked to inexperience, risk-taking, and social driving.</p>
+        </div>
+        <div class="card" style="margin-bottom: 16px;">
+          <h3>🧔 Adults (25–55)</h3>
+          <p style="margin-top: 8px;">Moderate risk. Experience balances against commuter fatigue and work-related travel stress.</p>
+        </div>
+        <div class="card">
+          <h3>👴 Seniors (55+)</h3>
+          <p style="margin-top: 8px;">Lower participation but higher fragility. Slower reaction times increase severity.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="age-note">
+      <h4>🧠 Neuroscience Insight</h4>
+      <p>Individuals aged 16–25 undergo prefrontal cortex maturation — the brain region governing impulse control, risk assessment, and decision-making. Meanwhile, reward and emotional systems are hyperactive, creating a temporary imbalance between the desire for immediate rewards and the ability to regulate behavior. This neurobiological factor, combined with limited driving experience, significantly contributes to the elevated accident rates observed in this demographic.</p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>12 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 13: TOOLS ===== -->
+<section class="slide" id="slide13">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <h2 class="section-title">Tools & <span>Technology Stack</span></h2>
+    </div>
+    
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-icon">📊</div>
+        <h3>Power BI</h3>
+        <ul>
+          <li>Dashboard creation</li>
+          <li>Data modeling</li>
+          <li>DAX measures</li>
+          <li>Interactive visualization</li>
+        </ul>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">⚡</div>
+        <h3>Power Query</h3>
+        <ul>
+          <li>Data cleaning</li>
+          <li>Data transformation</li>
+          <li>ETL pipeline</li>
+          <li>Schema design</li>
+        </ul>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">📑</div>
+        <h3>Excel</h3>
+        <ul>
+          <li>Data organization</li>
+          <li>Initial validation</li>
+          <li>Quick exploration</li>
+          <li>Source preparation</li>
+        </ul>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">🐍</div>
+        <h3>Python</h3>
+        <ul>
+          <li>Pandas & NumPy</li>
+          <li>Statistical analysis</li>
+          <li>Matplotlib charts</li>
+          <li>Data preprocessing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>13 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 14: KEY INSIGHTS ===== -->
+<section class="slide" id="slide14">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <h2 class="section-title">Key <span>Insights</span></h2>
+    </div>
+    
+    <div class="insight-list">
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-red);"></div>
+        <p><strong>High-risk governorates:</strong> Cairo, Giza, and Alexandria dominate absolute numbers, but rural governorates like Menia show disproportionately high per-capita rates combined with critically low ambulance coverage.</p>
+      </div>
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-orange);"></div>
+        <p><strong>Vehicle risk profile:</strong> Cars and "other" vehicles account for ~87% of accidents. The large "unknown" category (44%) signals a critical gap in data collection that hinders targeted interventions.</p>
+      </div>
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-cyan);"></div>
+        <p><strong>Vulnerable road users:</strong> Passengers and pedestrians constitute the majority of casualties, indicating that road safety is not just a driver issue — infrastructure and vehicle standards must improve for all users.</p>
+      </div>
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-purple);"></div>
+        <p><strong>Youth vulnerability:</strong> The 15–25 age group shows the highest injury and death rates. Neurobiological immaturity of the prefrontal cortex, combined with limited driving experience, creates a perfect storm for risk-taking behavior.</p>
+      </div>
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-green);"></div>
+        <p><strong>Emergency response gap:</strong> 59% of governorates fall below ambulance coverage targets. The correlation between low coverage and high accident severity suggests that faster response times could significantly reduce fatalities.</p>
+      </div>
+      <div class="insight-item">
+        <div class="insight-bullet" style="background: var(--accent-blue);"></div>
+        <p><strong>Positive trend:</strong> Deaths per 1,000 population declined from 2022 to 2024, suggesting that recent safety measures may be having a measurable impact — but sustained effort is needed.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>14 / 14</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 15: RECOMMENDATIONS ===== -->
+<section class="slide" id="slide15">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-number">14</div>
+      <h2 class="section-title">Recommendations</h2>
+    </div>
+    
+    <div class="rec-grid">
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(248,81,73,0.12);">📹</div>
+          <h4>Strengthen Road Monitoring</h4>
+        </div>
+        <ul>
+          <li>Increase surveillance cameras on highways</li>
+          <li>Monitor speeding and traffic violations</li>
+          <li>Enforce night curfews (11 PM – 5 AM) for novice drivers</li>
+          <li>Use telematics to track and reward safe driving</li>
+          <li>Implement vehicle speed caps via smart key tech</li>
+          <li>Restrict young passengers for novice drivers</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(240,136,62,0.12);">🛣️</div>
+          <h4>Improve Road Conditions</h4>
+        </div>
+        <ul>
+          <li>Regular maintenance of high-traffic corridors</li>
+          <li>Better signage and traffic signals</li>
+          <li>Pedestrian crossings and sidewalks</li>
+          <li>Street lighting in accident-prone zones</li>
+          <li>Speed bumps near schools and residential areas</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(210,153,34,0.12);">📢</div>
+          <h4>Increase Traffic Awareness</h4>
+        </div>
+        <ul>
+          <li>Educate drivers about speeding risks</li>
+          <li>Promote traffic rule compliance</li>
+          <li>School-based road safety programs</li>
+          <li>Social media campaigns targeting youth</li>
+          <li>Public service announcements during peak seasons</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(63,185,80,0.12);">🎓</div>
+          <h4>Improve Driver Training</h4>
+        </div>
+        <ul>
+          <li>Enhance license testing standards</li>
+          <li>Mandatory defensive driving courses</li>
+          <li>Youth-focused risk-awareness modules</li>
+          <li>Periodic re-certification for commercial drivers</li>
+          <li>Simulator-based training for hazard response</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(88,166,255,0.12);">🚗</div>
+          <h4>Improve Vehicle Safety</h4>
+        </div>
+        <ul>
+          <li>Mandate regular vehicle inspections</li>
+          <li>Enforce safety standards (ABS, airbags)</li>
+          <li>Promote helmet use for motorcyclists</li>
+          <li>Seatbelt enforcement campaigns</li>
+          <li>Incentivize safer vehicle purchases</li>
+        </ul>
+      </div>
+      <div class="rec-card">
+        <div class="rec-header">
+          <div class="rec-icon" style="background: rgba(163,113,247,0.12);">📈</div>
+          <h4>Continuous Data Analysis</h4>
+        </div>
+        <ul>
+          <li>Monitor high-risk locations in real-time</li>
+          <li>Use data-driven resource allocation</li>
+          <li>Annual dashboard updates with new data</li>
+          <li>Integrate traffic and health data systems</li>
+          <li>Publish open data for research community</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>15 / 15</span>
+  </div>
+</section>
+
+<!-- ===== SLIDE 16: CONCLUSION ===== -->
+<section class="slide" id="slide16">
+  <div class="slide-inner conclusion-slide">
+    <div class="title-icon" style="width: 100px; height: 100px; font-size: 48px; margin-bottom: 40px;">🛡️</div>
+    <h2>Data analysis transforms accident records into actionable insights that can support safer roads and better decision-making.</h2>
+    
+    <div class="placeholder conclusion-placeholder" style="min-height: 240px;">
+      <div class="ph-icon">🛣️</div>
+      <div class="ph-label">Final Road Safety Image Placeholder</div>
+      <div class="ph-hint">Insert a closing road safety / vision image here</div>
+    </div>
+    
+    <div class="title-meta" style="margin-top: 48px;">
+      <div class="meta-block">
+        <div class="label">Instructor</div>
+        <div class="value name">Eng. Mohamed Alnajjar</div>
+      </div>
+      <div class="meta-block">
+        <div class="label">Team</div>
+        <div class="value">Fadi Wadie, Ahmed Ali Hussein, Karem Hashem Aldafrawy, Mayada Ahmed Mohamed, Mariam Mostafa Ahmed</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Road Accident Analysis Dashboard</span>
+    <span>16 / 16</span>
+  </div>
+</section>
+
+<script>
+let currentSlide = 1;
+const totalSlides = 16;
+
+// Build nav dots
+const dotsContainer = document.getElementById('navDots');
+for (let i = 1; i <= totalSlides; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
+  dot.onclick = () => goToSlide(i);
+  dotsContainer.appendChild(dot);
+}
+
+function updateDots() {
+  document.querySelectorAll('.nav-dot').forEach((dot, idx) => {
+    dot.classList.toggle('active', idx + 1 === currentSlide);
+  });
+}
+
+function goToSlide(n) {
+  if (n < 1) n = 1;
+  if (n > totalSlides) n = totalSlides;
+  currentSlide = n;
+  const slide = document.getElementById('slide' + n);
+  if (slide) {
+    slide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  updateDots();
+}
+
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault();
+    nextSlide();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    prevSlide();
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    goToSlide(1);
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    goToSlide(totalSlides);
+  }
+});
+
+// Intersection Observer for slide animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      const id = entry.target.id;
+      if (id && id.startsWith('slide')) {
+        currentSlide = parseInt(id.replace('slide', ''));
+        updateDots();
+      }
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.slide').forEach(slide => {
+  observer.observe(slide);
+});
+
+// Touch/swipe support
+let touchStartY = 0;
+document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+document.addEventListener('touchend', e => {
+  const touchEndY = e.changedTouches[0].clientY;
+  const diff = touchStartY - touchEndY;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) nextSlide();
+    else prevSlide();
+  }
+});
+</script>
+
+</body>
+</html>
+
